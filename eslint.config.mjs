@@ -1,9 +1,16 @@
+import baseConfig from './eslint.base.config.mjs';
 import nx from '@nx/eslint-plugin';
 
 export default [
-  ...nx.configs['flat/base'],
-  ...nx.configs['flat/typescript'],
-  ...nx.configs['flat/javascript'],
+  {
+    files: ['**/*.json'],
+    // Override or add rules here
+    rules: {},
+    languageOptions: {
+      parser: await import('jsonc-eslint-parser'),
+    },
+  },
+  ...baseConfig,
   {
     ignores: ['**/dist'],
   },
