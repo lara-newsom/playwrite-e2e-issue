@@ -4,6 +4,7 @@ import { Tree, readProjectConfiguration } from '@nx/devkit';
 import { myGeneratorGenerator } from './my-generator';
 import { MyGeneratorGeneratorSchema } from './schema';
 import { E2eTestRunner } from '@nx/angular/generators';
+import { TempFs } from '../testing-utils/temp-fs';
 
 // This is in the nx/angular repo unit test for the Angular application generator, it doesn't help
 jest.mock('@nx/devkit', () => {
@@ -20,12 +21,22 @@ jest.mock('@nx/devkit', () => {
 
 describe('my-generator generator', () => {
   let tree: Tree;
+  let tempFs: TempFs;
+  let cwd = process.cwd();
 
   beforeEach(() => {
-    tree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' });
-    // This is in the nx/angular repo unit test for the Angular application generator, it doesn't help
-    tree.write('.gitignore', '');
+    tree = createTreeWithEmptyWorkspace();
+    tempFs = new TempFs('test');
+    tempFs.createFileSync("nx.json", `{"$schema": "./node_modules/nx/schemas/nx-schema.json", "plugins": []}`)
+    tree.write("nx.json", `{"$schema": "./node_modules/nx/schemas/nx-schema.json", "plugins": []}`)
+    tree.root = tempFs.tempDir
+    process.chdir(tree.root);
   });
+
+  afterEach(() => {
+    tempFs.reset();
+    process.chdir(cwd);
+  })
 
   it('none', async () => {
     const options: MyGeneratorGeneratorSchema = { name: 'plain-app',e2eTestRunner: E2eTestRunner.None };
